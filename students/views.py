@@ -1,13 +1,21 @@
 from functools import wraps
 
 from django.contrib import messages
+from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Count, Q
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import CourseForm, StudentForm, SubjectForm
+from .forms import (
+    CourseForm,
+    StaffAccountForm,
+    StudentForm,
+    StudentSignupForm,
+    SubjectForm,
+)
 from .models import Course, Student, Subject, UserProfile
 
 
@@ -44,6 +52,44 @@ def role_home(request):
     return redirect(destination)
 
 
+def student_register(request):
+    if request.user.is_authenticated:
+        return redirect("students:home")
+    if request.method == "POST":
+        form = StudentSignupForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                student = Student.objects.select_for_update().filter(
+                    student_id=form.cleaned_data["student_id"],
+                    email__iexact=form.cleaned_data["email"],
+                    user__isnull=True,
+                ).first()
+                if student is None:
+                    form.add_error(
+                        None,
+                        "No unlinked student record matches that student ID and email. "
+                        "Check your details or contact the registrar.",
+                    )
+                else:
+                    user = form.save(commit=False)
+                    user.first_name = student.first_name
+                    user.last_name = student.last_name
+                    user.email = student.email
+                    user.save()
+                    UserProfile.objects.create(
+                        user=user, role=UserProfile.Role.STUDENT
+                    )
+                    student.user = user
+                    student.save(update_fields=["user", "updated_at"])
+            if student is not None:
+                login(request, user)
+                messages.success(request, "Your student account is ready.")
+                return redirect("students:student_dashboard")
+    else:
+        form = StudentSignupForm()
+    return render(request, "registration/student_register.html", {"form": form})
+
+
 @role_required(UserProfile.Role.REGISTRAR)
 def registrar_dashboard(request):
     context = {
@@ -67,6 +113,30 @@ def registrar_dashboard(request):
         "recent_students": Student.objects.select_related("course")[:6],
     }
     return render(request, "students/registrar_dashboard.html", context)
+
+
+@role_required(UserProfile.Role.REGISTRAR)
+def staff_account_create(request):
+    if request.method == "POST":
+        form = StaffAccountForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                user = form.save()
+                UserProfile.objects.create(
+                    user=user, role=form.cleaned_data["role"]
+                )
+            messages.success(
+                request,
+                f"The {form.cleaned_data['role']} account was created.",
+            )
+            return redirect("students:registrar_dashboard")
+    else:
+        form = StaffAccountForm()
+    return render(
+        request,
+        "students/staff_account_form.html",
+        {"form": form, "page_title": "Create staff account"},
+    )
 
 
 @role_required(UserProfile.Role.INSTRUCTOR)

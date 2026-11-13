@@ -1,7 +1,51 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm
 
 from .models import Course, Student, Subject, UserProfile
+
+
+class StudentSignupForm(UserCreationForm):
+    student_id = forms.CharField(max_length=20, label="Student ID")
+    email = forms.EmailField()
+
+    class Meta(UserCreationForm.Meta):
+        model = get_user_model()
+        fields = ("username",)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.order_fields(
+            ["student_id", "email", "username", "password1", "password2"]
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        student_id = cleaned_data.get("student_id")
+        email = cleaned_data.get("email")
+        if student_id and email and not Student.objects.filter(
+            student_id=student_id,
+            email__iexact=email,
+            user__isnull=True,
+        ).exists():
+            raise forms.ValidationError(
+                "No unlinked student record matches that student ID and email. "
+                "Check your details or contact the registrar."
+            )
+        return cleaned_data
+
+
+class StaffAccountForm(UserCreationForm):
+    role = forms.ChoiceField(
+        choices=[
+            (UserProfile.Role.REGISTRAR, "Registrar"),
+            (UserProfile.Role.INSTRUCTOR, "Instructor"),
+        ]
+    )
+
+    class Meta(UserCreationForm.Meta):
+        model = get_user_model()
+        fields = ("username", "first_name", "last_name", "email")
 
 
 class StudentForm(forms.ModelForm):

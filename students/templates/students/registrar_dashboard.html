@@ -15,7 +15,7 @@
   <article class="stat-card"><span class="stat-label">Subjects</span><strong>{{ subject_count }}</strong><a class="stat-link" href="{% url 'students:subjects' %}">View subjects &rarr;</a></article>
 </section>
 <section class="panel staff-panel">
-  <div class="panel-heading"><div><h2>Registrar and instructors</h2><p>Staff accounts and their assigned portal roles.</p></div></div>
+  <div class="panel-heading"><div><h2>Registrar and instructors</h2><p>Staff accounts and their assigned portal roles.</p></div><a class="button button-primary" href="{% url 'students:staff_account_create' %}"><span aria-hidden="true">+</span> Create staff account</a></div>
   <div class="table-wrap"><table>
     <thead><tr><th>Staff member</th><th>Role</th><th>Email</th></tr></thead>
     <tbody>{% for profile in staff_profiles %}

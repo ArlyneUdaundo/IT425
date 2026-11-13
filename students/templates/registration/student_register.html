@@ -1,0 +1,24 @@
+{% extends "students/base.html" %}
+
+{% block title %}Create student account{% endblock %}
+
+{% block content %}
+<div class="form-page login-page">
+  <section class="form-panel">
+    <div class="form-heading"><p class="eyebrow">EDUCATE STUDENT PORTAL</p><h1>Create student account</h1><p class="subtitle">Use the student ID and email on your record to link your account.</p></div>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="form-grid login-grid">{% for field in form %}
+        <div class="form-field field-wide">
+          <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="required">*</span>{% endif %}</label>
+          {{ field }}
+          {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+          {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        </div>
+      {% endfor %}</div>
+      <div class="form-actions"><a class="button button-secondary" href="{% url 'login' %}">Cancel</a><button class="button button-primary" type="submit">Create account</button></div>
+    </form>
+  </section>
+</div>
+{% endblock %}

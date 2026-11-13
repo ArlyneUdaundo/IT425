@@ -33,6 +33,7 @@
         </form>
       {% else %}
         <a href="{% url 'login' %}">Sign in</a>
+        <a href="{% url 'students:student_register' %}">Create student account</a>
       {% endif %}
     </nav>
   </header>

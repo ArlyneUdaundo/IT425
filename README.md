@@ -58,7 +58,8 @@ Open <http://127.0.0.1:8000/> to sign in. The portal shown after sign-in depends
 
 - **Registrar:** manage student records, courses, and subjects, and assign instructors to subjects.
 - **Instructor:** view assigned subjects and the corresponding course rosters.
-- **Student:** view their own record and the subjects in their course. The registrar links each student account to its student record.
+- **Student:** create an account using the student ID and email already on their registrar-created record, then view that record and the subjects in their course.
+- Registrars can create registrar and instructor accounts from the registrar dashboard. Public sign-up is limited to students; staff roles cannot be selected during student registration.
 
 To create the requested sample roster locally, run:
 

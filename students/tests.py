@@ -55,6 +55,96 @@ class StudentDirectoryTests(TestCase):
         )
         self.assertContains(self.client.get(reverse("students:list")), "Avery Morgan")
 
+    def test_student_can_create_account_for_an_unlinked_record(self):
+        self.client.logout()
+
+        response = self.client.post(
+            reverse("students:student_register"),
+            {
+                "student_id": self.student.student_id,
+                "email": self.student.email,
+                "username": "avery",
+                "password1": "Strong-test-password-478!",
+                "password2": "Strong-test-password-478!",
+            },
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("students:student_dashboard"),
+            fetch_redirect_response=False,
+        )
+        user = User.objects.get(username="avery")
+        self.student.refresh_from_db()
+        self.assertEqual(self.student.user, user)
+        self.assertEqual(user.profile.role, UserProfile.Role.STUDENT)
+        self.assertTrue(user.check_password("Strong-test-password-478!"))
+        self.assertContains(self.client.get(reverse("students:student_dashboard")), "Avery")
+
+    def test_student_signup_requires_matching_unlinked_record(self):
+        self.client.logout()
+
+        response = self.client.post(
+            reverse("students:student_register"),
+            {
+                "student_id": self.student.student_id,
+                "email": "wrong@example.com",
+                "username": "not-linked",
+                "password1": "Strong-test-password-478!",
+                "password2": "Strong-test-password-478!",
+                "role": UserProfile.Role.REGISTRAR,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(User.objects.filter(username="not-linked").exists())
+        self.assertContains(response, "No unlinked student record matches")
+
+    def test_registrar_can_create_registrar_and_instructor_accounts(self):
+        for username, role in (
+            ("new-registrar", UserProfile.Role.REGISTRAR),
+            ("new-instructor", UserProfile.Role.INSTRUCTOR),
+        ):
+            response = self.client.post(
+                reverse("students:staff_account_create"),
+                {
+                    "username": username,
+                    "first_name": "New",
+                    "last_name": "Staff",
+                    "email": f"{username}@example.com",
+                    "role": role,
+                    "password1": "Strong-test-password-478!",
+                    "password2": "Strong-test-password-478!",
+                },
+            )
+
+            self.assertRedirects(
+                response,
+                reverse("students:registrar_dashboard"),
+                fetch_redirect_response=False,
+            )
+            account = User.objects.get(username=username)
+            self.assertEqual(account.profile.role, role)
+            self.assertTrue(account.check_password("Strong-test-password-478!"))
+
+    def test_only_registrars_can_create_staff_accounts(self):
+        instructor = User.objects.create_user(username="teacher")
+        UserProfile.objects.create(user=instructor, role=UserProfile.Role.INSTRUCTOR)
+        self.client.force_login(instructor)
+
+        response = self.client.post(
+            reverse("students:staff_account_create"),
+            {
+                "username": "unauthorized",
+                "role": UserProfile.Role.REGISTRAR,
+                "password1": "Strong-test-password-478!",
+                "password2": "Strong-test-password-478!",
+            },
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(User.objects.filter(username="unauthorized").exists())
+
     def test_directory_shows_students_and_summary(self):
         response = self.client.get(reverse("students:list"))
 

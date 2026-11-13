@@ -6,7 +6,13 @@ app_name = "students"
 
 urlpatterns = [
     path("", views.role_home, name="home"),
+    path("register/", views.student_register, name="student_register"),
     path("registrar/", views.registrar_dashboard, name="registrar_dashboard"),
+    path(
+        "registrar/accounts/add/",
+        views.staff_account_create,
+        name="staff_account_create",
+    ),
     path("registrar/students/", views.student_list, name="list"),
     path("registrar/students/add/", views.student_create, name="create"),
     path("registrar/students/<int:pk>/edit/", views.student_update, name="update"),
