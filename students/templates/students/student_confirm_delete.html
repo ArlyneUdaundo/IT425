@@ -1,0 +1,19 @@
+{% extends "students/base.html" %}
+
+{% block title %}Delete student{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <a class="back-link" href="{% url 'students:list' %}">&larr; Back to students</a>
+  <section class="confirm-panel">
+    <div class="delete-icon" aria-hidden="true">!</div>
+    <p class="eyebrow">DELETE RECORD</p>
+    <h1>Delete {{ student.full_name }}?</h1>
+    <p>This will permanently remove the student record for <strong>{{ student.student_id }}</strong>. This action cannot be undone.</p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-actions"><a class="button button-secondary" href="{% url 'students:list' %}">Cancel</a><button class="button button-danger" type="submit">Delete record</button></div>
+    </form>
+  </section>
+</div>
+{% endblock %}

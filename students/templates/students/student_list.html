@@ -1,0 +1,56 @@
+{% extends "students/base.html" %}
+
+{% block title %}Students{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">OVERVIEW</p>
+    <h1>Student records</h1>
+    <p class="subtitle">Manage student information and enrollment details.</p>
+  </div>
+  <a class="button button-primary" href="{% url 'students:create' %}"><span aria-hidden="true">+</span> Add student</a>
+</section>
+
+<section class="stats" aria-label="Student summary">
+  <article class="stat-card"><span class="stat-label">Total students</span><strong>{{ student_count }}</strong><span class="stat-note">Records in directory</span></article>
+  <article class="stat-card"><span class="stat-label">Courses represented</span><strong>{{ course_count }}</strong><span class="stat-note">Distinct courses</span></article>
+</section>
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2>Directory</h2><p>Search by name, student ID, email, or course.</p></div>
+    <form class="search-form" method="get">
+      <label class="sr-only" for="student-search">Search students</label>
+      <input id="student-search" type="search" name="q" value="{{ query }}" placeholder="Search students...">
+      <button class="button button-secondary" type="submit">Search</button>
+      {% if query %}<a class="clear-search" href="{% url 'students:list' %}">Clear</a>{% endif %}
+    </form>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Student</th><th>Student ID</th><th>Course</th><th>Email</th><th>Enrolled</th><th><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody>
+      {% for student in students %}
+        <tr>
+          <td><div class="student-cell"><span class="avatar">{{ student.first_name|slice:":1"|upper }}{{ student.last_name|slice:":1"|upper }}</span><span class="student-name">{{ student.full_name }}</span></div></td>
+          <td><span class="id-badge">{{ student.student_id }}</span></td>
+          <td>{{ student.course }}</td>
+          <td><a class="email-link" href="mailto:{{ student.email }}">{{ student.email }}</a></td>
+          <td>{{ student.enrollment_date|date:"M j, Y" }}</td>
+          <td class="actions"><a href="{% url 'students:update' student.pk %}">Edit</a><a class="delete-link" href="{% url 'students:delete' student.pk %}">Delete</a></td>
+        </tr>
+      {% empty %}
+        <tr><td class="empty-state" colspan="6">
+          <strong>{% if query %}No matching students{% else %}No student records yet{% endif %}</strong>
+          <span>{% if query %}Try a different search term.{% else %}Add a student to start building your directory.{% endif %}</span>
+          {% if not query %}<a class="button button-primary" href="{% url 'students:create' %}">Add first student</a>{% endif %}
+        </td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if query and students %}<p class="result-note">Showing {{ students|length }} matching record{{ students|length|pluralize }}.</p>{% endif %}
+</section>
+{% endblock %}

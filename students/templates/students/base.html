@@ -1,0 +1,28 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Student records{% endblock %} | Campus</title>
+  <link rel="stylesheet" href="{% static 'students/styles.css' %}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{% url 'students:list' %}">
+      <span class="brand-mark">C</span>
+      <span>Campus<span class="brand-light">Records</span></span>
+    </a>
+    <nav><a href="{% url 'students:list' %}">Students</a><a href="/admin/">Admin</a></nav>
+  </header>
+  <main class="page">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="footer">Student Records Management</footer>
+</body>
+</html>
