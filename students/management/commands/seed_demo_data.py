@@ -11,18 +11,89 @@ COURSES = [
     ("BSCS", "Computer Science"),
     ("BSIT", "Information Technology"),
     ("BSBA", "Business Administration"),
+    ("BSN", "Nursing"),
+    ("BSED", "Secondary Education"),
+    ("BEED", "Elementary Education"),
+    ("BSHM", "Hospitality Management"),
+    ("BSTM", "Tourism Management"),
+    ("BSCRIM", "Criminology"),
+    ("BSECE", "Electronics Engineering"),
+]
+
+COURSE_SUBJECTS = [
+    ("BSCS", "CS1", [
+        "Programming Fundamentals", "Database Systems", "Computer Networks",
+        "Data Structures", "Operating Systems", "Software Engineering",
+        "Web Development", "Cybersecurity", "Artificial Intelligence",
+        "Systems Analysis and Design",
+    ]),
+    ("BSIT", "IT2", [
+        "Web Development", "Cybersecurity", "Systems Administration",
+        "Database Management", "Networking Fundamentals", "IT Project Management",
+        "Cloud Computing", "Human-Computer Interaction", "Mobile App Development",
+        "Information Assurance",
+    ]),
+    ("BSBA", "BA1", [
+        "Principles of Management", "Financial Accounting", "Marketing Principles",
+        "Business Communication", "Human Resource Management", "Business Finance",
+        "Operations Management", "Entrepreneurship", "Business Law",
+        "Strategic Management",
+    ]),
+    ("BSN", "NUR", [
+        "Fundamentals of Nursing", "Anatomy and Physiology", "Health Assessment",
+        "Nursing Informatics", "Pharmacology", "Community Health Nursing",
+        "Maternal and Child Nursing", "Medical-Surgical Nursing",
+        "Mental Health Nursing", "Nursing Research",
+    ]),
+    ("BSED", "SED", [
+        "Foundations of Education", "Educational Psychology", "Curriculum Development",
+        "Assessment of Learning", "Teaching Strategies", "Classroom Management",
+        "Inclusive Education", "Instructional Technology", "Research in Education",
+        "Practice Teaching",
+    ]),
+    ("BEED", "EED", [
+        "Child and Adolescent Development", "Principles of Teaching",
+        "Teaching Reading", "Teaching Mathematics", "Teaching Science",
+        "Teaching Social Studies", "Assessment in Elementary Education",
+        "Educational Technology", "Inclusive Classroom Practices",
+        "Practice Teaching",
+    ]),
+    ("BSHM", "HM", [
+        "Introduction to Hospitality", "Food and Beverage Service",
+        "Front Office Operations", "Housekeeping Management",
+        "Food Safety and Sanitation", "Hospitality Marketing",
+        "Culinary Fundamentals", "Event Management", "Hospitality Accounting",
+        "Hotel Operations",
+    ]),
+    ("BSTM", "TM", [
+        "Introduction to Tourism", "Tourism Planning and Development",
+        "Travel Agency Operations", "Tour Guiding", "Tourism Marketing",
+        "Airline Operations", "Sustainable Tourism", "Event and Convention Management",
+        "Tourism Geography", "Tourism Research",
+    ]),
+    ("BSCRIM", "CRIM", [
+        "Introduction to Criminology", "Criminal Law", "Police Organization",
+        "Criminal Investigation", "Forensic Science", "Criminal Sociology",
+        "Correctional Administration", "Victimology", "Ethics in Criminal Justice",
+        "Criminal Justice Research",
+    ]),
+    ("BSECE", "ECE", [
+        "Circuit Analysis", "Digital Systems Design", "Electronic Devices",
+        "Signals and Systems", "Microprocessor Systems", "Communication Systems",
+        "Control Systems", "Electromagnetics", "Engineering Mathematics",
+        "Electronics Design Project",
+    ]),
 ]
 
 SUBJECTS = [
-    ("CS101", "Programming Fundamentals", "BSCS", "demo_instructor1"),
-    ("CS102", "Database Systems", "BSCS", "demo_instructor1"),
-    ("CS103", "Computer Networks", "BSCS", "demo_instructor2"),
-    ("IT201", "Web Development", "BSIT", "demo_instructor1"),
-    ("IT202", "Cybersecurity", "BSIT", "demo_instructor2"),
-    ("IT203", "Systems Administration", "BSIT", "demo_instructor2"),
-    ("BA101", "Principles of Management", "BSBA", "demo_instructor1"),
-    ("BA102", "Financial Accounting", "BSBA", "demo_instructor2"),
-    ("BA103", "Marketing Principles", "BSBA", "demo_instructor2"),
+    (
+        f"{prefix}{index:02d}",
+        name,
+        course_code,
+        "demo_instructor1" if index % 2 else "demo_instructor2",
+    )
+    for course_code, prefix, names in COURSE_SUBJECTS
+    for index, name in enumerate(names, start=1)
 ]
 
 PEOPLE = [
@@ -142,6 +213,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Demo academic data is ready."))
         self.stdout.write("Accounts: 1 registrar, 2 instructors, and 10 students.")
+        self.stdout.write("Academic catalog: 10 courses and 100 subjects.")
         if created_credentials:
             self.stdout.write(
                 self.style.WARNING(

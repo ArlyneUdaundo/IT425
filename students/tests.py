@@ -324,5 +324,9 @@ class StudentDirectoryTests(TestCase):
         self.assertEqual(
             UserProfile.objects.filter(role=UserProfile.Role.STUDENT).count(), 10
         )
-        self.assertEqual(Course.objects.count(), 3)
-        self.assertEqual(Subject.objects.count(), 9)
+        self.assertEqual(Course.objects.count(), 10)
+        self.assertEqual(Subject.objects.count(), 100)
+        self.assertEqual(
+            [course.subjects.count() for course in Course.objects.order_by("code")],
+            [10] * 10,
+        )
