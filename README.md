@@ -54,6 +54,12 @@ A student directory built with Django and PostgreSQL. It supports creating, view
 
 Open <http://127.0.0.1:8000/> for the student directory or <http://127.0.0.1:8000/admin/> for the Django admin.
 
+## Deploy to Render
+
+The root `render.yaml` defines a free Render web service and PostgreSQL database. Push this repository to GitHub, then in the [Render Dashboard](https://dashboard.render.com/blueprints) choose **New Blueprint Instance**, connect this repository, and apply the blueprint. Render will build the app, collect static files, run database migrations, and provide the live `.onrender.com` URL.
+
+The blueprint generates a Django secret key and configures the production database URL, host, and CSRF settings. After the first deployment, create an admin user from the web service's Shell using `python manage.py createsuperuser`.
+
 ## Student fields
 
 Each record includes a unique student ID and email address, name, optional phone and address, date of birth, optional gender, course, and enrollment date. The directory can be searched by student ID, name, email, or course.
