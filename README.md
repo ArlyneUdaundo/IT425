@@ -72,7 +72,15 @@ This idempotently creates 1 registrar, 2 instructors, 10 students, 3 courses, an
 
 The root `render.yaml` defines a free Render web service. Push this repository to GitHub, then in the [Render Dashboard](https://dashboard.render.com/blueprints) choose **New Blueprint Instance**, connect this repository, and apply the blueprint. Provide the `DATABASE_URL` of a PostgreSQL database when prompted. On startup, the app creates a dedicated `student_records_app` schema in that database, then runs migrations in that schema so its Django tables stay separate from tables in the database's default schema. Render will build the app, collect static files, and provide the live `.onrender.com` URL.
 
-The blueprint generates a Django secret key and configures the production host and CSRF settings. After deploying, open the web service's Shell and run `python manage.py seed_demo_data` to provision the sample registrar, instructors, students, courses, and subjects. Store the generated initial passwords securely. Alternatively create an administrator with `python manage.py createsuperuser`; Django superusers receive registrar access.
+The blueprint generates a Django secret key and configures the production host and CSRF settings. After deploying, run `python manage.py seed_demo_data` to provision the sample registrar, instructors, students, courses, and subjects. Render's Shell is available only for paid web services; for a Free web service, run the command locally against the database's **External Database URL** from the Render dashboard:
+
+```powershell
+$env:DATABASE_URL = "<External Database URL from Render>"
+py manage.py seed_demo_data
+Remove-Item Env:DATABASE_URL
+```
+
+Run this from the project directory with the dependencies installed. Do not share or commit the database URL. Store the generated initial passwords securely; the command prints passwords only for accounts it creates. Alternatively create an administrator with `python manage.py createsuperuser`; Django superusers receive registrar access.
 
 ## Student fields
 
