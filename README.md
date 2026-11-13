@@ -1,4 +1,4 @@
-# Student Records Management
+# Educate Student Record Management System
 
 A Django and PostgreSQL academic records app with separate registrar, instructor, and student portals. Registrars manage the roster and course catalog, instructors view their assigned subject rosters, and students see their own linked records and subjects.
 

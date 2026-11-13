@@ -4,14 +4,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Student records{% endblock %} | Campus</title>
+  <title>{% block title %}Student records{% endblock %} | Educate</title>
+  <link rel="icon" type="image/jpeg" href="{% static 'students/educate-logo.jpg' %}">
   <link rel="stylesheet" href="{% static 'students/styles.css' %}">
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="{% url 'students:home' %}">
-      <span class="brand-mark">C</span>
-      <span>Campus<span class="brand-light">Records</span></span>
+      <img class="brand-logo" src="{% static 'students/educate-logo.jpg' %}" alt="">
+      <span>Educate</span>
     </a>
     <nav>
       {% if user.is_authenticated %}
@@ -43,6 +44,6 @@
     {% endif %}
     {% block content %}{% endblock %}
   </main>
-  <footer class="footer">Student Records Management</footer>
+  <footer class="footer">Educate Student Record Management System</footer>
 </body>
 </html>

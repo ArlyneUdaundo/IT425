@@ -6,7 +6,7 @@
 <div class="form-page">
   <a class="back-link" href="{% url 'students:list' %}">&larr; Back to students</a>
   <section class="form-panel">
-    <div class="form-heading"><p class="eyebrow">STUDENT DIRECTORY</p><h1>{{ page_title }}</h1><p class="subtitle">Enter the student's details below.</p></div>
+    <div class="form-heading"><p class="eyebrow">EDUCATE STUDENT RECORDS</p><h1>{{ page_title }}</h1><p class="subtitle">Enter the student's details below.</p></div>
     <form method="post" novalidate>
       {% csrf_token %}
       {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
