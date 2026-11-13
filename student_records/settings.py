@@ -69,12 +69,16 @@ DATABASES = {
     }
 }
 if os.getenv("DATABASE_URL"):
-    DATABASES["default"] = dj_database_url.parse(
+    database_config = dj_database_url.parse(
         os.environ["DATABASE_URL"],
         conn_max_age=600,
         conn_health_checks=True,
         ssl_require=not DEBUG,
     )
+    database_config.setdefault("OPTIONS", {})["options"] = (
+        "-c search_path=student_records_app"
+    )
+    DATABASES["default"] = database_config
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

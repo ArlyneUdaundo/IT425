@@ -56,9 +56,9 @@ Open <http://127.0.0.1:8000/> for the student directory or <http://127.0.0.1:800
 
 ## Deploy to Render
 
-The root `render.yaml` defines a free Render web service and PostgreSQL database. Push this repository to GitHub, then in the [Render Dashboard](https://dashboard.render.com/blueprints) choose **New Blueprint Instance**, connect this repository, and apply the blueprint. Render will build the app, collect static files, run database migrations, and provide the live `.onrender.com` URL.
+The root `render.yaml` defines a free Render web service. Push this repository to GitHub, then in the [Render Dashboard](https://dashboard.render.com/blueprints) choose **New Blueprint Instance**, connect this repository, and apply the blueprint. Provide the `DATABASE_URL` of a PostgreSQL database when prompted. On startup, the app creates a dedicated `student_records_app` schema in that database, then runs migrations in that schema so its Django tables stay separate from tables in the database's default schema. Render will build the app, collect static files, and provide the live `.onrender.com` URL.
 
-The blueprint generates a Django secret key and configures the production database URL, host, and CSRF settings. After the first deployment, create an admin user from the web service's Shell using `python manage.py createsuperuser`.
+The blueprint generates a Django secret key and configures the production host and CSRF settings. After the first deployment, create an admin user from the web service's Shell using `python manage.py createsuperuser`.
 
 ## Student fields
 
