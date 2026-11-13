@@ -1,0 +1,16 @@
+{% extends "students/base.html" %}
+
+{% block title %}Instructor portal{% endblock %}
+
+{% block content %}
+<section class="page-heading"><div><p class="eyebrow">INSTRUCTOR PORTAL</p><h1>Welcome, {{ user.get_full_name|default:user.username }}</h1><p class="subtitle">Your assigned subjects and student rosters.</p></div></section>
+<section class="panel">
+  <div class="panel-heading"><div><h2>My subjects</h2><p>Open a subject to view its enrolled students.</p></div></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Subject</th><th>Subject code</th><th>Course</th><th>Students</th><th></th></tr></thead>
+    <tbody>{% for subject in subjects %}
+      <tr><td class="student-name">{{ subject.name }}</td><td><span class="id-badge">{{ subject.code }}</span></td><td>{{ subject.course.name }}</td><td>{{ subject.student_count }}</td><td><a class="text-link" href="{% url 'students:instructor_subject' subject.pk %}">View roster &rarr;</a></td></tr>
+    {% empty %}<tr><td class="empty-state" colspan="5"><strong>No subjects assigned</strong><span>Ask the registrar to assign subjects to your instructor account.</span></td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}

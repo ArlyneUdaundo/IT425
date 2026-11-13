@@ -1,6 +1,6 @@
 # Student Records Management
 
-A student directory built with Django and PostgreSQL. Staff sign in to create, view, search, edit, and delete student records, with additional access through Django admin.
+A Django and PostgreSQL academic records app with separate registrar, instructor, and student portals. Registrars manage the roster and course catalog, instructors view their assigned subject rosters, and students see their own linked records and subjects.
 
 ## Requirements
 
@@ -52,14 +52,28 @@ A student directory built with Django and PostgreSQL. Staff sign in to create, v
    py manage.py runserver
    ```
 
-Open <http://127.0.0.1:8000/> for the student directory or <http://127.0.0.1:8000/admin/> for the Django admin.
+Open <http://127.0.0.1:8000/> to sign in. The portal shown after sign-in depends on the account's role. Django admin is at <http://127.0.0.1:8000/admin/>.
+
+## Roles and sample academic data
+
+- **Registrar:** manage student records, courses, and subjects, and assign instructors to subjects.
+- **Instructor:** view assigned subjects and the corresponding course rosters.
+- **Student:** view their own record and the subjects in their course. The registrar links each student account to its student record.
+
+To create the requested sample roster locally, run:
+
+```powershell
+py manage.py seed_demo_data
+```
+
+This idempotently creates 1 registrar, 2 instructors, 10 students, 3 courses, and 9 sample subjects. New accounts get unique randomly generated passwords printed once by the command. Save them securely and change them after first sign-in. Existing passwords are never reset by rerunning the command. To set a shared initial password for newly created demo accounts instead, pass `--password "your-temporary-password"` and change the accounts individually afterward.
 
 ## Deploy to Render
 
 The root `render.yaml` defines a free Render web service. Push this repository to GitHub, then in the [Render Dashboard](https://dashboard.render.com/blueprints) choose **New Blueprint Instance**, connect this repository, and apply the blueprint. Provide the `DATABASE_URL` of a PostgreSQL database when prompted. On startup, the app creates a dedicated `student_records_app` schema in that database, then runs migrations in that schema so its Django tables stay separate from tables in the database's default schema. Render will build the app, collect static files, and provide the live `.onrender.com` URL.
 
-The blueprint generates a Django secret key and configures the production host and CSRF settings. After the first deployment, create an admin user from the web service's Shell using `python manage.py createsuperuser`.
+The blueprint generates a Django secret key and configures the production host and CSRF settings. After deploying, open the web service's Shell and run `python manage.py seed_demo_data` to provision the sample registrar, instructors, students, courses, and subjects. Store the generated initial passwords securely. Alternatively create an administrator with `python manage.py createsuperuser`; Django superusers receive registrar access.
 
 ## Student fields
 
-Each record includes a unique student ID and email address, name, optional phone and address, date of birth, optional gender, course, and enrollment date. The directory can be searched by student ID, name, email, or course.
+Each student record includes a unique student ID and email address, name, optional phone and address, date of birth, optional gender, course, enrollment date, and an optional linked portal account. Courses group students and contain subjects; subjects can be assigned to instructors.

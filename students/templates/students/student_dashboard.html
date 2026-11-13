@@ -1,0 +1,18 @@
+{% extends "students/base.html" %}
+
+{% block title %}Student portal{% endblock %}
+
+{% block content %}
+<section class="page-heading"><div><p class="eyebrow">STUDENT PORTAL</p><h1>Welcome{% if student %}, {{ student.first_name }}{% else %}, {{ user.get_full_name|default:user.username }}{% endif %}</h1><p class="subtitle">Your personal student record and subject enrollments.</p></div></section>
+{% if student %}
+  <section class="stats"><article class="stat-card"><span class="stat-label">Student ID</span><strong class="student-id-value">{{ student.student_id }}</strong><span class="stat-note">{{ student.full_name }}</span></article><article class="stat-card"><span class="stat-label">Course</span><strong class="course-value">{{ student.course.name }}</strong><span class="stat-note">{{ student.course.code }}</span></article></section>
+  <section class="panel"><div class="panel-heading"><div><h2>My subjects</h2><p>Subjects included in your course.</p></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Subject</th><th>Code</th><th>Instructor</th></tr></thead><tbody>
+      {% for subject in subjects %}<tr><td class="student-name">{{ subject.name }}</td><td><span class="id-badge">{{ subject.code }}</span></td><td>{% for instructor in subject.instructors.all %}{{ instructor.get_full_name|default:instructor.username }}{% if not forloop.last %}, {% endif %}{% empty %}To be assigned{% endfor %}</td></tr>
+      {% empty %}<tr><td class="empty-state" colspan="3"><strong>No subjects listed yet</strong><span>Your course subject list will appear here.</span></td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+{% else %}
+  <section class="panel empty-profile"><h2>Your student record is not linked yet</h2><p>Please contact the registrar to link your account to your student record.</p></section>
+{% endif %}
+{% endblock %}

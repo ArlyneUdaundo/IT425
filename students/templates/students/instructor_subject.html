@@ -1,0 +1,16 @@
+{% extends "students/base.html" %}
+
+{% block title %}{{ subject.name }} roster{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{% url 'students:instructor_dashboard' %}">&larr; My subjects</a>
+<section class="page-heading"><div><p class="eyebrow">INSTRUCTOR ROSTER · {{ subject.code }}</p><h1>{{ subject.name }}</h1><p class="subtitle">{{ subject.course.name }} · {{ students|length }} enrolled student{{ students|length|pluralize }}</p></div></section>
+<section class="panel"><div class="panel-heading"><div><h2>Enrolled students</h2><p>Students in this subject's course.</p></div></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Student</th><th>Student ID</th><th>Email</th><th>Enrolled</th></tr></thead>
+    <tbody>{% for student in students %}
+      <tr><td class="student-name">{{ student.full_name }}</td><td><span class="id-badge">{{ student.student_id }}</span></td><td>{{ student.email }}</td><td>{{ student.enrollment_date|date:"M j, Y" }}</td></tr>
+    {% empty %}<tr><td class="empty-state" colspan="4"><strong>No students enrolled</strong><span>This course roster is currently empty.</span></td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}

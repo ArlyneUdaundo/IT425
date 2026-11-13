@@ -1,0 +1,13 @@
+{% extends "students/base.html" %}
+
+{% block title %}Subjects{% endblock %}
+
+{% block content %}
+<section class="page-heading"><div><p class="eyebrow">REGISTRAR PORTAL</p><h1>Subjects</h1><p class="subtitle">Course subjects and instructor assignments.</p></div><a class="button button-primary" href="{% url 'students:subject_create' %}"><span aria-hidden="true">+</span> Add subject</a></section>
+<section class="panel"><div class="table-wrap"><table>
+  <thead><tr><th>Subject</th><th>Code</th><th>Course</th><th>Instructors</th></tr></thead>
+  <tbody>{% for subject in subjects %}<tr><td class="student-name">{{ subject.name }}</td><td><span class="id-badge">{{ subject.code }}</span></td><td>{{ subject.course.name }}</td><td>{% for instructor in subject.instructors.all %}{{ instructor.get_full_name|default:instructor.username }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="muted">Unassigned</span>{% endfor %}</td></tr>
+  {% empty %}<tr><td class="empty-state" colspan="4"><strong>No subjects yet</strong><span>Add subjects and assign them to instructors.</span></td></tr>{% endfor %}</tbody>
+</table></div>
+<div class="catalog-footer"><a class="text-link" href="{% url 'students:courses' %}">&larr; Courses</a></div></section>
+{% endblock %}
