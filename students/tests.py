@@ -1,11 +1,18 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
 from .models import Student
 
+User = get_user_model()
+
 
 class StudentDirectoryTests(TestCase):
     def setUp(self):
+        self.user = User.objects.create_user(
+            username="registrar", password="test-password"
+        )
+        self.client.force_login(self.user)
         self.student = Student.objects.create(
             student_id="STU-001",
             first_name="Avery",
@@ -15,6 +22,29 @@ class StudentDirectoryTests(TestCase):
             course="Computer Science",
             enrollment_date="2024-09-01",
         )
+
+    def test_anonymous_users_cannot_access_student_records(self):
+        self.client.logout()
+
+        response = self.client.get(reverse("students:list"))
+
+        self.assertRedirects(
+            response,
+            f"{reverse('login')}?next={reverse('students:list')}",
+            fetch_redirect_response=False,
+        )
+        self.assertEqual(Student.objects.count(), 1)
+
+    def test_user_can_sign_in(self):
+        self.client.logout()
+
+        response = self.client.post(
+            reverse("login"),
+            {"username": "registrar", "password": "test-password"},
+        )
+
+        self.assertRedirects(response, reverse("students:list"))
+        self.assertContains(self.client.get(reverse("students:list")), "Avery Morgan")
 
     def test_directory_shows_students_and_summary(self):
         response = self.client.get(reverse("students:list"))

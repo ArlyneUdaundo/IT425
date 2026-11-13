@@ -1,6 +1,6 @@
 # Student Records Management
 
-A student directory built with Django and PostgreSQL. It supports creating, viewing, searching, editing, and deleting student records, plus Django admin access.
+A student directory built with Django and PostgreSQL. Staff sign in to create, view, search, edit, and delete student records, with additional access through Django admin.
 
 ## Requirements
 

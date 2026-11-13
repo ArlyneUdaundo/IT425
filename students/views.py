@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -6,6 +7,7 @@ from .forms import StudentForm
 from .models import Student
 
 
+@login_required
 def student_list(request):
     query = request.GET.get("q", "").strip()
     students = Student.objects.all()
@@ -27,6 +29,7 @@ def student_list(request):
     return render(request, "students/student_list.html", context)
 
 
+@login_required
 def student_create(request):
     if request.method == "POST":
         form = StudentForm(request.POST)
@@ -43,6 +46,7 @@ def student_create(request):
     )
 
 
+@login_required
 def student_update(request, pk):
     student = get_object_or_404(Student, pk=pk)
     if request.method == "POST":
@@ -60,6 +64,7 @@ def student_update(request, pk):
     )
 
 
+@login_required
 def student_delete(request, pk):
     student = get_object_or_404(Student, pk=pk)
     if request.method == "POST":
