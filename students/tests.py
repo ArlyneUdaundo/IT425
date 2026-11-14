@@ -87,6 +87,8 @@ class StudentDirectoryTests(TestCase):
         self.assertContains(response, "registrar")
         self.assertContains(response, "Registrar")
         self.assertContains(response, reverse("students:account"))
+        self.assertContains(response, '<aside class="sidebar" aria-label="Main navigation">')
+        self.assertContains(response, '<nav class="side-nav">')
 
     def test_my_account_shows_linked_student_identifier(self):
         student_user = User.objects.create_user(username="avery")

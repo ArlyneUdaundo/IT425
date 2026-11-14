@@ -14,7 +14,10 @@
       <img class="brand-logo" src="{% static 'students/educate-logo.jpg' %}" alt="">
       <span>Educate</span>
     </a>
-    <nav>
+  </header>
+  <div class="app-layout">
+    <aside class="sidebar" aria-label="Main navigation">
+      <nav class="side-nav">
       {% if user.is_authenticated %}
         {% if user.is_superuser or user.profile.role == "registrar" %}
           <a href="{% url 'students:registrar_dashboard' %}">Dashboard</a>
@@ -32,25 +35,30 @@
           <a href="{% url 'enrollment:student_request' %}">Request enrollment</a>
         {% endif %}
         <a href="{% url 'students:account' %}">My account</a>
-        <form class="logout-form" method="post" action="{% url 'logout' %}">
-          {% csrf_token %}
-          <button type="submit">Sign out</button>
-        </form>
       {% else %}
         <a href="{% url 'login' %}">Sign in</a>
         <a href="{% url 'students:student_register' %}">Create student account</a>
         <a href="{% url 'admissions:apply' %}">Apply for admission</a>
       {% endif %}
-    </nav>
-  </header>
-  <main class="page">
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}
-      </div>
-    {% endif %}
-    {% block content %}{% endblock %}
-  </main>
-  <footer class="footer">Educate Student Record Management System</footer>
+      </nav>
+      {% if user.is_authenticated %}
+        <form class="logout-form" method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit">Sign out</button>
+        </form>
+      {% endif %}
+    </aside>
+    <div class="content-area">
+      <main class="page">
+        {% if messages %}
+          <div class="messages">
+            {% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}
+          </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+      </main>
+      <footer class="footer">Educate Student Record Management System</footer>
+    </div>
+  </div>
 </body>
 </html>
