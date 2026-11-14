@@ -1,0 +1,41 @@
+{% extends "students/base.html" %}
+
+{% block title %}My account{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">ACCOUNT</p>
+    <h1>My account</h1>
+    <p class="subtitle">Confirm which account is currently signed in.</p>
+  </div>
+</section>
+<section class="panel">
+  <div class="panel-heading">
+    <div>
+      <h2>{{ account_user.get_full_name|default:account_user.username }}</h2>
+      <p>Signed in as <strong>{{ account_user.username }}</strong></p>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <tbody>
+        <tr><th scope="row">Account name</th><td>{{ account_user.get_full_name|default:"Not provided" }}</td></tr>
+        <tr><th scope="row">Username</th><td>{{ account_user.username }}</td></tr>
+        <tr><th scope="row">Email</th><td>{{ account_user.email|default:"Not provided" }}</td></tr>
+        <tr><th scope="row">Portal role</th><td>{{ role_label }}</td></tr>
+        {% if student %}
+          <tr><th scope="row">Student ID</th><td>{{ student.student_id }}</td></tr>
+          <tr><th scope="row">Course</th><td>{{ student.course.name }} ({{ student.course.code }})</td></tr>
+          <tr><th scope="row">Student status</th><td>{{ student.get_status_display }}</td></tr>
+        {% endif %}
+        {% if faculty %}
+          <tr><th scope="row">Faculty ID</th><td>{{ faculty.faculty_id }}</td></tr>
+          <tr><th scope="row">Department</th><td>{{ faculty.department.name }}</td></tr>
+          <tr><th scope="row">Employment status</th><td>{{ faculty.get_employment_status_display }}</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

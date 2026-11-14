@@ -9,6 +9,7 @@ from django.urls import reverse
 
 from departments.models import Department
 from documents.models import StudentDocument
+from faculty.models import FacultyProfile
 from .models import Course, Student, Subject, UserProfile
 
 User = get_user_model()
@@ -78,6 +79,60 @@ class StudentDirectoryTests(TestCase):
             reverse("students:registrar_dashboard"),
         )
         self.assertContains(self.client.get(reverse("students:list")), "Avery Morgan")
+
+    def test_my_account_identifies_registrar_and_is_in_navigation(self):
+        response = self.client.get(reverse("students:account"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "registrar")
+        self.assertContains(response, "Registrar")
+        self.assertContains(response, reverse("students:account"))
+
+    def test_my_account_shows_linked_student_identifier(self):
+        student_user = User.objects.create_user(username="avery")
+        UserProfile.objects.create(
+            user=student_user, role=UserProfile.Role.STUDENT
+        )
+        self.student.user = student_user
+        self.student.save(update_fields=["user"])
+        self.client.force_login(student_user)
+
+        response = self.client.get(reverse("students:account"))
+
+        self.assertContains(response, "Student ID")
+        self.assertContains(response, "STU-001")
+        self.assertContains(response, "Test Program")
+
+    def test_my_account_shows_linked_faculty_identifier(self):
+        instructor = User.objects.create_user(
+            username="teacher", first_name="Taylor", last_name="Brooks"
+        )
+        UserProfile.objects.create(
+            user=instructor, role=UserProfile.Role.INSTRUCTOR
+        )
+        FacultyProfile.objects.create(
+            user=instructor,
+            faculty_id="FAC-001",
+            department=self.department,
+        )
+        self.client.force_login(instructor)
+
+        response = self.client.get(reverse("students:account"))
+
+        self.assertContains(response, "Instructor")
+        self.assertContains(response, "FAC-001")
+        self.assertContains(response, "General Studies")
+
+    def test_anonymous_users_must_sign_in_to_view_my_account(self):
+        self.client.logout()
+
+        response = self.client.get(reverse("students:account"))
+
+        self.assertRedirects(
+            response,
+            f"{reverse('login')}?next={reverse('students:account')}",
+            fetch_redirect_response=False,
+        )
 
     def test_student_can_create_account_for_an_unlinked_record(self):
         self.client.logout()

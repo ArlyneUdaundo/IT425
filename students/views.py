@@ -63,6 +63,31 @@ def role_home(request):
     return redirect(destination)
 
 
+@login_required
+def account_detail(request):
+    profile = UserProfile.objects.filter(user=request.user).first()
+    student = Student.objects.select_related("course").filter(user=request.user).first()
+    faculty = FacultyProfile.objects.select_related("department").filter(
+        user=request.user
+    ).first()
+    if request.user.is_superuser:
+        role_label = "System administrator"
+    elif profile:
+        role_label = profile.get_role_display()
+    else:
+        role_label = "Role not assigned"
+    return render(
+        request,
+        "students/account_detail.html",
+        {
+            "account_user": request.user,
+            "role_label": role_label,
+            "student": student,
+            "faculty": faculty,
+        },
+    )
+
+
 def student_register(request):
     if request.user.is_authenticated:
         return redirect("students:home")
