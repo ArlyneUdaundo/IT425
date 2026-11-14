@@ -1,0 +1,24 @@
+{% extends "students/base.html" %}
+
+{% block title %}Enrollment assessment{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <a class="back-link" href="{% if student_request %}{% url 'students:student_dashboard' %}{% else %}{% url 'enrollment:list' %}{% endif %}">&larr; Back</a>
+  <section class="form-panel">
+    <div class="form-heading"><p class="eyebrow">{% if student_request %}STUDENT PORTAL{% else %}REGISTRAR PORTAL{% endif %}</p><h1>{% if student_request %}Request enrollment{% else %}Create enrollment assessment{% endif %}</h1><p class="subtitle">{% if student_request %}Choose an active section for your course. The registrar will assess your request.{% else %}Create a pending enrollment for registrar assessment.{% endif %}</p></div>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="form-grid">{% for field in form %}
+        <div class="form-field field-wide">
+          <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="required">*</span>{% endif %}</label>
+          {{ field }}
+          {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+        </div>
+      {% endfor %}</div>
+      <div class="form-actions"><button class="button button-primary" type="submit">Submit</button></div>
+    </form>
+  </section>
+</div>
+{% endblock %}

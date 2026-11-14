@@ -1,0 +1,40 @@
+{% extends "students/base.html" %}
+
+{% block title %}Admission applications{% endblock %}
+
+{% block content %}
+<section class="page-heading"><div><p class="eyebrow">REGISTRAR PORTAL</p><h1>Admission applications</h1><p class="subtitle">Review applications and create student records on approval.</p></div></section>
+<section class="panel">
+  <form class="panel-heading" method="get">
+    <label for="status">Application status</label>
+    <select id="status" name="status">
+      <option value="">All statuses</option>
+      {% for value, label in statuses %}<option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button class="button button-secondary" type="submit">Filter</button>
+  </form>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Application</th><th>Applicant</th><th>Course</th><th>Status</th><th>Submitted</th><th>Review</th></tr></thead>
+    <tbody>{% for application in applications %}
+      <tr>
+        <td>{{ application.application_number }}</td>
+        <td>{{ application.last_name }}, {{ application.first_name }}<br><small>{{ application.email }}</small></td>
+        <td>{{ application.preferred_course.name }}</td>
+        <td>{{ application.get_status_display }}</td>
+        <td>{{ application.submitted_at|date:"Y-m-d" }}</td>
+        <td>
+          {% if application.status != "approved" and application.status != "rejected" %}
+          <form method="post" action="{% url 'admissions:review' application.pk %}" class="inline-review-form">
+            {% csrf_token %}
+            <input name="review_notes" aria-label="Review notes" placeholder="Review notes">
+            <button class="button button-secondary" name="action" value="review">Review</button>
+            <button class="button button-primary" name="action" value="approve">Approve</button>
+            <button class="button button-danger" name="action" value="reject">Reject</button>
+          </form>
+          {% elif application.student %}Student ID: {{ application.student.student_id }}{% endif %}
+        </td>
+      </tr>
+    {% empty %}<tr><td class="empty-state" colspan="6"><strong>No applications found</strong><span>Submitted applications will appear here.</span></td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}

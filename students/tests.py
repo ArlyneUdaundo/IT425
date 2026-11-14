@@ -3,6 +3,7 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 
+from departments.models import Department
 from .models import Course, Student, Subject, UserProfile
 
 User = get_user_model()
@@ -15,7 +16,8 @@ class StudentDirectoryTests(TestCase):
         )
         UserProfile.objects.create(user=self.user, role=UserProfile.Role.REGISTRAR)
         self.client.force_login(self.user)
-        self.course = Course.objects.create(code="CS", name="Computer Science")
+        self.department = Department.objects.create(code="GEN", name="General Studies")
+        self.course = Course.objects.create(code="TEST", name="Test Program")
         self.student = Student.objects.create(
             student_id="STU-001",
             first_name="Avery",
@@ -113,6 +115,8 @@ class StudentDirectoryTests(TestCase):
                     "last_name": "Staff",
                     "email": f"{username}@example.com",
                     "role": role,
+                    "department": self.department.pk,
+                    "faculty_id": f"FAC-{username}" if role == UserProfile.Role.INSTRUCTOR else "",
                     "password1": "Strong-test-password-478!",
                     "password2": "Strong-test-password-478!",
                 },
@@ -151,10 +155,10 @@ class StudentDirectoryTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Avery Morgan")
         self.assertContains(response, "STU-001")
-        self.assertContains(response, "Computer Science")
+        self.assertContains(response, "Test Program")
 
     def test_directory_searches_across_student_fields(self):
-        response = self.client.get(reverse("students:list"), {"q": "Computer"})
+        response = self.client.get(reverse("students:list"), {"q": "Test"})
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Avery Morgan")
@@ -262,7 +266,8 @@ class StudentDirectoryTests(TestCase):
             reverse("students:delete", args=[self.student.pk])
         )
         self.assertRedirects(response, reverse("students:list"))
-        self.assertFalse(Student.objects.filter(pk=self.student.pk).exists())
+        self.student.refresh_from_db()
+        self.assertTrue(self.student.is_archived)
 
     def test_instructor_only_sees_assigned_subject_rosters(self):
         instructor = User.objects.create_user(username="teacher")
@@ -324,9 +329,12 @@ class StudentDirectoryTests(TestCase):
         self.assertEqual(
             UserProfile.objects.filter(role=UserProfile.Role.STUDENT).count(), 10
         )
-        self.assertEqual(Course.objects.count(), 10)
-        self.assertEqual(Subject.objects.count(), 100)
+        self.assertEqual(Course.objects.filter(is_generated=True).count(), 10)
+        self.assertEqual(Subject.objects.filter(is_generated=True).count(), 100)
         self.assertEqual(
-            [course.subjects.count() for course in Course.objects.order_by("code")],
+            [
+                course.subjects.filter(is_generated=True).count()
+                for course in Course.objects.filter(is_generated=True).order_by("code")
+            ],
             [10] * 10,
         )

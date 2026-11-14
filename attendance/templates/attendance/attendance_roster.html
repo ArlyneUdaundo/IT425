@@ -1,0 +1,31 @@
+{% extends "students/base.html" %}
+
+{% block title %}Class attendance{% endblock %}
+
+{% block content %}
+<section class="page-heading"><div><p class="eyebrow">ATTENDANCE</p><h1>{{ class_subject.subject.name }}</h1><p class="subtitle">{{ class_subject.section }} · Attendance register</p></div></section>
+<section class="panel">
+  <form method="get" class="panel-heading">
+    <label for="{{ date_form.class_date.id_for_label }}">Class date</label>
+    {{ date_form.class_date }}
+    <button class="button button-secondary" type="submit">Load date</button>
+  </form>
+  <form method="post">
+    {% csrf_token %}
+    {% if date_form.class_date.errors %}<div class="form-errors">{{ date_form.class_date.errors }}</div>{% endif %}
+    <input type="hidden" name="class_date" value="{{ attendance_date|default:'' }}">
+    <div class="table-wrap"><table>
+      <thead><tr><th>Student</th><th>Student ID</th><th>Attendance</th><th>Notes</th></tr></thead>
+      <tbody>{% for item, form in entry_forms %}
+        <tr>
+          <td>{{ item.enrollment.student.full_name }}</td>
+          <td>{{ item.enrollment.student.student_id }}</td>
+          <td>{{ form.status }}{% for error in form.status.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</td>
+          <td>{{ form.notes }}{% for error in form.notes.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</td>
+        </tr>
+      {% empty %}<tr><td class="empty-state" colspan="4"><strong>No enrolled students</strong><span>Approved enrollments in this class will appear here.</span></td></tr>{% endfor %}</tbody>
+    </table></div>
+    <div class="form-actions"><button class="button button-primary" type="submit">Save attendance</button></div>
+  </form>
+</section>
+{% endblock %}

@@ -1,18 +1,19 @@
 {% extends "students/base.html" %}
 
-{% block title %}Delete student{% endblock %}
+{% block title %}Archive student{% endblock %}
 
 {% block content %}
 <div class="form-page">
   <a class="back-link" href="{% url 'students:list' %}">&larr; Back to students</a>
   <section class="confirm-panel">
     <div class="delete-icon" aria-hidden="true">!</div>
-    <p class="eyebrow">DELETE RECORD</p>
-    <h1>Delete {{ student.full_name }}?</h1>
-    <p>This will permanently remove the student record for <strong>{{ student.student_id }}</strong>. This action cannot be undone.</p>
+    <p class="eyebrow">{% if student.is_archived %}RESTORE RECORD{% else %}ARCHIVE RECORD{% endif %}</p>
+    <h1>{% if student.is_archived %}Restore{% else %}Archive{% endif %} {{ student.full_name }}?</h1>
+    <p>{% if student.is_archived %}The record for <strong>{{ student.student_id }}</strong> will return to the active directory.{% else %}The record for <strong>{{ student.student_id }}</strong> will be hidden from the active directory. Existing academic history will be retained.{% endif %}</p>
     <form method="post">
       {% csrf_token %}
-      <div class="form-actions"><a class="button button-secondary" href="{% url 'students:list' %}">Cancel</a><button class="button button-danger" type="submit">Delete record</button></div>
+      <input type="hidden" name="action" value="{% if student.is_archived %}restore{% else %}archive{% endif %}">
+      <div class="form-actions"><a class="button button-secondary" href="{% url 'students:list' %}">Cancel</a><button class="button button-danger" type="submit">{% if student.is_archived %}Restore record{% else %}Archive record{% endif %}</button></div>
     </form>
   </section>
 </div>

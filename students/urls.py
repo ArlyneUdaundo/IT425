@@ -8,6 +8,12 @@ urlpatterns = [
     path("", views.role_home, name="home"),
     path("register/", views.student_register, name="student_register"),
     path("registrar/", views.registrar_dashboard, name="registrar_dashboard"),
+    path("registrar/reports/", views.registrar_reports, name="reports"),
+    path(
+        "registrar/reports/<str:report_type>.csv",
+        views.registrar_report_export,
+        name="report_export",
+    ),
     path(
         "registrar/accounts/add/",
         views.staff_account_create,

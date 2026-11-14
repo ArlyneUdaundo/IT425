@@ -12,6 +12,18 @@
       {% empty %}<tr><td class="empty-state" colspan="3"><strong>No subjects listed yet</strong><span>Your course subject list will appear here.</span></td></tr>{% endfor %}
     </tbody></table></div>
   </section>
+  <section class="panel"><div class="panel-heading"><div><h2>Enrollment history</h2><p>Term enrollment, grades, and attendance.</p></div><a class="text-link" href="{% url 'enrollment:student_request' %}">Request enrollment</a></div>
+    <div class="table-wrap"><table><thead><tr><th>Academic period</th><th>Section</th><th>Subject</th><th>Grade</th><th>Attendance</th><th>Status</th></tr></thead><tbody>
+      {% for enrollment in enrollments %}
+        {% for item in enrollment.subjects.all %}
+        <tr><td>{{ enrollment.semester }}</td><td>{{ enrollment.section.name|default:"—" }}</td><td>{{ item.class_subject.subject.code }} — {{ item.class_subject.subject.name }}</td>
+          <td>{% if item.grade.computed_final_grade != None %}{{ item.grade.computed_final_grade }} · {{ item.grade.standing }}{% else %}Not recorded{% endif %}</td>
+          <td>{% if item.attendance_percentage != None %}{{ item.attendance_percentage }}%{% else %}No records{% endif %}</td>
+          <td>{{ enrollment.get_status_display }}</td></tr>
+        {% empty %}<tr><td>{{ enrollment.semester }}</td><td>{{ enrollment.section.name|default:"—" }}</td><td colspan="4">No subjects assigned</td></tr>{% endfor %}
+      {% empty %}<tr><td class="empty-state" colspan="6"><strong>No enrollment history</strong><span>Approved course enrollments will appear here.</span></td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
 {% else %}
   <section class="panel empty-profile"><h2>Your student record is not linked yet</h2><p>Please contact the registrar to link your account to your student record.</p></section>
 {% endif %}

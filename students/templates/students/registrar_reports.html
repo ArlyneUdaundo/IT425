@@ -1,0 +1,27 @@
+{% extends "students/base.html" %}
+
+{% block title %}Reports and exports{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">REGISTRAR PORTAL</p>
+    <h1>Reports and exports</h1>
+    <p class="subtitle">Download current academic records as CSV files.</p>
+  </div>
+</section>
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Report</th><th>Contents</th><th><span class="sr-only">Download</span></th></tr></thead>
+      <tbody>
+        <tr><td>Student directory</td><td>Active student profiles and course assignments</td><td><a class="button button-secondary" href="{% url 'students:report_export' 'students' %}">Download CSV</a></td></tr>
+        <tr><td>Enrollments</td><td>Enrollment requests and decisions by term</td><td><a class="button button-secondary" href="{% url 'students:report_export' 'enrollments' %}">Download CSV</a></td></tr>
+        <tr><td>Grades</td><td>Grade entries, computed averages, and standing</td><td><a class="button button-secondary" href="{% url 'students:report_export' 'grades' %}">Download CSV</a></td></tr>
+        <tr><td>Attendance</td><td>Class attendance entries and notes</td><td><a class="button button-secondary" href="{% url 'students:report_export' 'attendance' %}">Download CSV</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="stat-note">Generated starter records are labeled unverified in each export. Handle downloaded student data securely.</p>
+</section>
+{% endblock %}

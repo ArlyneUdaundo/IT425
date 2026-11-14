@@ -39,6 +39,9 @@ h2 { margin-bottom: 4px; font-size: 18px; }
 .button-danger:hover { background: #982f2f; }
 .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
 .role-stats { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.inline-review-form { display: flex; align-items: center; gap: 6px; }
+.inline-review-form input { min-width: 90px; max-width: 150px; height: 36px; padding: 6px; border: 1px solid #dfe6e1; border-radius: 6px; font: inherit; }
+.inline-review-form .button { min-height: 34px; padding: 0 9px; font-size: 11px; }
 .stat-card, .panel, .form-panel, .confirm-panel { border: 1px solid var(--line); border-radius: 10px; background: #fff; box-shadow: 0 2px 6px rgb(21 45 32 / 3%); }
 .stat-card { min-height: 125px; padding: 20px 22px; display: flex; flex-direction: column; align-items: flex-start; }
 .stat-label { color: #59665d; font-weight: 600; }

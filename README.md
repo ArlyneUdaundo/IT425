@@ -1,6 +1,6 @@
 # Educate Student Record Management System
 
-A Django and PostgreSQL academic records app with separate registrar, instructor, and student portals. Registrars manage the roster and course catalog, instructors view their assigned subject rosters, and students see their own linked records and subjects.
+A Django and PostgreSQL academic records app with separate registrar, instructor, and student portals. It supports admissions, terms and class sections, enrollment decisions, grade history, attendance, and registrar CSV reports in addition to student and course records.
 
 ## Requirements
 
@@ -57,9 +57,13 @@ Open <http://127.0.0.1:8000/> to sign in. The portal shown after sign-in depends
 ## Roles and sample academic data
 
 - **Registrar:** manage student records, courses, and subjects, and assign instructors to subjects.
-- **Instructor:** view assigned subjects and the corresponding course rosters.
+- **Instructor:** view assigned classes, record attendance, and enter or revise grades. Grade revisions are retained in grade history.
 - **Student:** create an account using the student ID and email already on their registrar-created record, then view that record and the subjects in their course.
 - Registrars can create registrar and instructor accounts from the registrar dashboard. Public sign-up is limited to students; staff roles cannot be selected during student registration.
+- Prospective students can submit an application at `/apply/`. Registrars review applications and may approve them into student records.
+- Students can request enrollment in an active class section. Registrars assess requests and cannot approve beyond section capacity.
+- Registrars can download CSV reports for students, enrollments, grades, and attendance from **Reports** in the portal.
+- The registrar dashboard links to course and subject management; Django admin provides management screens for departments, academic terms, curricula, class sections, schedules, faculty, and documents.
 
 To create the requested sample roster locally, run:
 
@@ -67,13 +71,13 @@ To create the requested sample roster locally, run:
 py manage.py seed_demo_data
 ```
 
-This idempotently creates 1 registrar, 2 instructors, 10 students, 10 courses, and 10 sample subjects per course (100 total). New accounts get unique randomly generated passwords printed once by the command. Save them securely and change them after first sign-in. Existing passwords are never reset by rerunning the command. To set a shared initial password for newly created demo accounts instead, pass `--password "your-temporary-password"` and change the accounts individually afterward.
+This idempotently creates 1 registrar, 2 instructors, 10 students, 10 courses, and 10 sample subjects per course (100 total), along with sample terms, sections, curricula, enrollments, grades, and attendance. Seeded records are marked **generated and unverified**; they are demonstration data, not verified institutional records. New accounts get unique randomly generated passwords printed once by the command. Save them securely and change them after first sign-in. Existing passwords are never reset by rerunning the command. To set a shared initial password for newly created demo accounts instead, pass `--password "your-temporary-password"` and change the accounts individually afterward.
 
 ## Deploy to Render
 
 The root `render.yaml` defines a free Render web service. Push this repository to GitHub, then in the [Render Dashboard](https://dashboard.render.com/blueprints) choose **New Blueprint Instance**, connect this repository, and apply the blueprint. Provide the `DATABASE_URL` of a PostgreSQL database when prompted. On startup, the app creates a dedicated `student_records_app` schema in that database, then runs migrations in that schema so its Django tables stay separate from tables in the database's default schema. Render will build the app, collect static files, and provide the live `.onrender.com` URL.
 
-The blueprint generates a Django secret key and configures the production host and CSRF settings. After deploying, run `python manage.py seed_demo_data` to provision the sample registrar, instructors, students, courses, and subjects. Render's Shell is available only for paid web services; for a Free web service, run the command locally against the database's **External Database URL** from the Render dashboard:
+The blueprint generates a Django secret key and configures the production host and CSRF settings. Only run `python manage.py seed_demo_data` against a database where demonstration accounts and unverified sample records are appropriate. Render's Shell is available only for paid web services; for a Free web service, run the command locally against the database's **External Database URL** from the Render dashboard:
 
 ```powershell
 $env:DATABASE_URL = "<External Database URL from Render>"
