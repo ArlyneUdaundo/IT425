@@ -38,4 +38,15 @@
     </table>
   </div>
 </section>
+{% if student %}
+<section class="panel staff-panel">
+  <div class="panel-heading">
+    <div>
+      <h2>Enrollment</h2>
+      <p>Request a place in an active class section for your course.</p>
+    </div>
+    <a class="button button-primary" href="{% url 'enrollment:student_request' %}">Request enrollment</a>
+  </div>
+</section>
+{% endif %}
 {% endblock %}

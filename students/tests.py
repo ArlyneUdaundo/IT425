@@ -102,6 +102,10 @@ class StudentDirectoryTests(TestCase):
         self.assertContains(response, "Student ID")
         self.assertContains(response, "STU-001")
         self.assertContains(response, "Test Program")
+        self.assertContains(response, "Request enrollment")
+        self.assertContains(
+            response, reverse("enrollment:student_request")
+        )
 
     def test_my_account_shows_linked_faculty_identifier(self):
         instructor = User.objects.create_user(
