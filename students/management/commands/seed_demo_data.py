@@ -1,6 +1,12 @@
 import secrets
 from datetime import date, timedelta
 
+from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
+from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
+from django.utils import timezone
+
 from accounts.services import provision_registrar_access
 from academics.models import (
     AcademicYear,
@@ -12,12 +18,10 @@ from academics.models import (
     Semester,
 )
 from attendance.models import AttendanceRecord
-from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
-from django.utils import timezone
-
+from admissions.models import AdmissionApplication, AdmissionDocument
+from audit_logs.models import AuditLog
 from departments.models import Department
+from documents.models import StudentDocument
 from enrollment.models import Enrollment, EnrollmentSubject
 from faculty.models import FacultyProfile
 from grading.models import Grade
@@ -165,6 +169,44 @@ STUDENTS = [
     ("STU-2025-009", "demo_student09", "BSBA"),
     ("STU-2025-010", "demo_student10", "BSBA"),
 ]
+
+
+def build_sample_pdf():
+    stream = (
+        b"BT /F1 16 Tf 50 750 Td (DEMO SAMPLE - NOT OFFICIAL) Tj "
+        b"0 -28 Td /F1 11 Tf (Generated example document for testing only.) Tj ET"
+    )
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+        b"/Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        (
+            f"<< /Length {len(stream)} >>\nstream\n".encode("ascii")
+            + stream
+            + b"\nendstream"
+        ),
+    ]
+    pdf = bytearray(b"%PDF-1.4\n")
+    offsets = [0]
+    for index, obj in enumerate(objects, start=1):
+        offsets.append(len(pdf))
+        pdf.extend(f"{index} 0 obj\n".encode("ascii"))
+        pdf.extend(obj)
+        pdf.extend(b"\nendobj\n")
+    xref_offset = len(pdf)
+    pdf.extend(f"xref\n0 {len(offsets)}\n".encode("ascii"))
+    pdf.extend(b"0000000000 65535 f \n")
+    for offset in offsets[1:]:
+        pdf.extend(f"{offset:010d} 00000 n \n".encode("ascii"))
+    pdf.extend(
+        (
+            f"trailer\n<< /Size {len(offsets)} /Root 1 0 R >>\n"
+            f"startxref\n{xref_offset}\n%%EOF\n"
+        ).encode("ascii")
+    )
+    return bytes(pdf)
 
 
 class Command(BaseCommand):
@@ -406,6 +448,7 @@ class Command(BaseCommand):
                     },
                 )
 
+        generated_students = []
         for index, (student_id, username, course_code) in enumerate(STUDENTS, start=1):
             user = users[username]
             student, created = Student.objects.get_or_create(
@@ -433,6 +476,7 @@ class Command(BaseCommand):
             if student.user_id is None:
                 student.user = user
                 student.save(update_fields=["user"])
+            generated_students.append(student)
             UserProfile.objects.get_or_create(
                 user=user, defaults={"role": UserProfile.Role.STUDENT}
             )
@@ -487,9 +531,153 @@ class Command(BaseCommand):
                         },
                     )
 
+        for index, (application_number, first_name, last_name, email, course_code, status) in enumerate(
+            (
+                (
+                    "ADM-DEMO-001",
+                    "Sample Applicant One",
+                    "Example",
+                    "applicant1@example.test",
+                    "BSCS",
+                    AdmissionApplication.Status.SUBMITTED,
+                ),
+                (
+                    "ADM-DEMO-002",
+                    "Sample Applicant Two",
+                    "Example",
+                    "applicant2@example.test",
+                    "BSIT",
+                    AdmissionApplication.Status.UNDER_REVIEW,
+                ),
+            ),
+            start=1,
+        ):
+            application, created = AdmissionApplication.objects.get_or_create(
+                application_number=application_number,
+                defaults={
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "email": email,
+                    "phone": "000-000-0000",
+                    "date_of_birth": date(2005, 1, index),
+                    "address": "Generated sample data only; not a real applicant.",
+                    "preferred_course": courses[course_code],
+                    "status": status,
+                    "review_notes": (
+                        "Generated example; review before using this workflow."
+                        if status == AdmissionApplication.Status.UNDER_REVIEW
+                        else ""
+                    ),
+                    "reviewed_by": (
+                        users["demo_registrar"]
+                        if status == AdmissionApplication.Status.UNDER_REVIEW
+                        else None
+                    ),
+                    "reviewed_at": (
+                        timezone.now()
+                        if status == AdmissionApplication.Status.UNDER_REVIEW
+                        else None
+                    ),
+                    "is_generated": True,
+                },
+            )
+            if not created and not application.is_generated:
+                raise CommandError(
+                    f"Application number {application_number!r} belongs to a "
+                    "non-generated record."
+                )
+            requirement_name = "Sample supporting document"
+            admission_document = AdmissionDocument.objects.filter(
+                application=application,
+                requirement_name=requirement_name,
+            ).first()
+            if admission_document and not admission_document.is_generated:
+                raise CommandError(
+                    f"The {requirement_name!r} for {application_number!r} is "
+                    "a non-generated record."
+                )
+            if admission_document is None:
+                document = AdmissionDocument(
+                    application=application,
+                    requirement_name=requirement_name,
+                    status=AdmissionDocument.Status.RECEIVED,
+                    notes="Generated sample PDF; not a real identity document.",
+                    is_generated=True,
+                )
+                document.file.save(
+                    f"sample-admission-{index}.pdf",
+                    ContentFile(build_sample_pdf()),
+                    save=False,
+                )
+                document.save()
+
+        for index, student in enumerate(generated_students, start=1):
+            document_number = f"DOC-DEMO-{index:04d}"
+            issued = index <= 5
+            document, created = StudentDocument.objects.get_or_create(
+                document_number=document_number,
+                defaults={
+                    "student": student,
+                    "document_type": (
+                        StudentDocument.Type.ENROLLMENT
+                        if issued
+                        else StudentDocument.Type.TRANSCRIPT
+                    ),
+                    "status": (
+                        StudentDocument.Status.ISSUED
+                        if issued
+                        else StudentDocument.Status.REQUESTED
+                    ),
+                    "issued_at": timezone.now() if issued else None,
+                    "issued_by": users["demo_registrar"] if issued else None,
+                    "notes": "Generated example; not an official student document.",
+                    "is_generated": True,
+                },
+            )
+            if not created and not document.is_generated:
+                raise CommandError(
+                    f"Document number {document_number!r} belongs to a "
+                    "non-generated record."
+                )
+
+        for action, entity_type, entity_id, description in (
+            (
+                AuditLog.Action.CREATE,
+                "admissions.AdmissionApplication",
+                "ADM-DEMO-001",
+                "Generated sample activity: a demonstration admission application was submitted.",
+            ),
+            (
+                AuditLog.Action.CREATE,
+                "documents.StudentDocument",
+                "DOC-DEMO-0001",
+                "Generated sample activity: a demonstration enrollment document was issued.",
+            ),
+        ):
+            activity = AuditLog.objects.filter(
+                entity_type=entity_type,
+                entity_id=entity_id,
+                description=description,
+            ).first()
+            if activity and not activity.is_generated:
+                raise CommandError(
+                    f"Sample activity {entity_type} {entity_id} conflicts with "
+                    "a non-generated audit record."
+                )
+            if activity is None:
+                AuditLog.objects.create(
+                    actor=users["demo_registrar"],
+                    action=action,
+                    entity_type=entity_type,
+                    entity_id=entity_id,
+                    description=description,
+                    is_generated=True,
+                )
+
         self.stdout.write(self.style.SUCCESS("Institutional starter records are ready."))
         self.stdout.write("Accounts: 1 registrar, 2 instructors, and 10 students.")
         self.stdout.write("Academic catalog: 10 courses and 100 subjects.")
+        self.stdout.write("Workflow examples: admissions, sample documents, and audit history.")
         self.stdout.write("Generated academic records are marked as unverified.")
         if created_credentials:
             self.stdout.write(

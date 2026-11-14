@@ -31,6 +31,7 @@ class AdmissionApplication(models.Model):
     review_notes = models.TextField(blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
+    is_generated = models.BooleanField(default=False)
     reviewed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -75,6 +76,7 @@ class AdmissionDocument(models.Model):
     )
     reviewed_at = models.DateTimeField(null=True, blank=True)
     notes = models.CharField(max_length=240, blank=True)
+    is_generated = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["requirement_name"]

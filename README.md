@@ -71,7 +71,7 @@ To create the requested sample roster locally, run:
 py manage.py seed_demo_data
 ```
 
-This idempotently creates 1 registrar, 2 instructors, 10 students, 10 courses, and 10 sample subjects per course (100 total), along with sample terms, sections, curricula, enrollments, grades, and attendance. Seeded records are marked **generated and unverified**; they are demonstration data, not verified institutional records. New accounts get unique randomly generated passwords printed once by the command. Save them securely and change them after first sign-in. Existing passwords are never reset by rerunning the command. To set a shared initial password for newly created demo accounts instead, pass `--password "your-temporary-password"` and change the accounts individually afterward.
+This idempotently creates 1 registrar, 2 instructors, 10 students, 10 courses, and 10 sample subjects per course (100 total), along with sample departments, faculty, terms, sections, curricula, enrollments, grades, attendance, admission applications and supporting PDFs, student-document requests, and audit history. Seeded records are marked **generated and unverified**; sample applicants, documents, and events are clearly labeled and are not verified institutional records. New accounts get unique randomly generated passwords printed once by the command. Save them securely and change them after first sign-in. Existing passwords are never reset by rerunning the command. To set a shared initial password for newly created demo accounts instead, pass `--password "your-temporary-password"` and change the accounts individually afterward.
 
 ## Deploy to Render
 

@@ -1,15 +1,37 @@
+from tempfile import TemporaryDirectory
+
+from admissions.models import AdmissionApplication, AdmissionDocument
+from audit_logs.models import AuditLog
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from departments.models import Department
+from documents.models import StudentDocument
 from .models import Course, Student, Subject, UserProfile
 
 User = get_user_model()
 
 
 class StudentDirectoryTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls._media_directory = TemporaryDirectory()
+        cls._media_settings = override_settings(
+            MEDIA_ROOT=cls._media_directory.name
+        )
+        cls._media_settings.enable()
+
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            cls._media_settings.disable()
+            cls._media_directory.cleanup()
+        finally:
+            super().tearDownClass()
+
     def setUp(self):
         self.user = User.objects.create_user(
             username="registrar", password="test-password"
@@ -331,6 +353,22 @@ class StudentDirectoryTests(TestCase):
         )
         self.assertEqual(Course.objects.filter(is_generated=True).count(), 10)
         self.assertEqual(Subject.objects.filter(is_generated=True).count(), 100)
+        self.assertEqual(
+            AdmissionApplication.objects.filter(is_generated=True).count(), 2
+        )
+        self.assertEqual(
+            AdmissionDocument.objects.filter(is_generated=True).count(), 2
+        )
+        sample_admission_document = AdmissionDocument.objects.get(
+            application__application_number="ADM-DEMO-001",
+            is_generated=True,
+        )
+        with sample_admission_document.file.open("rb") as sample_file:
+            self.assertTrue(sample_file.read(8).startswith(b"%PDF-"))
+        self.assertEqual(
+            StudentDocument.objects.filter(is_generated=True).count(), 10
+        )
+        self.assertEqual(AuditLog.objects.filter(is_generated=True).count(), 2)
         self.assertEqual(
             [
                 course.subjects.filter(is_generated=True).count()

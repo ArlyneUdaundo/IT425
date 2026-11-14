@@ -31,6 +31,7 @@ class StudentDocument(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
     )
     notes = models.CharField(max_length=240, blank=True)
+    is_generated = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-requested_at"]

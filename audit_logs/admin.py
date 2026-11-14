@@ -5,8 +5,15 @@ from .models import AuditLog
 
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):
-    list_display = ("created_at", "actor", "action", "entity_type", "entity_id")
-    list_filter = ("action", "entity_type", "created_at")
+    list_display = (
+        "created_at",
+        "actor",
+        "action",
+        "entity_type",
+        "entity_id",
+        "is_generated",
+    )
+    list_filter = ("action", "entity_type", "created_at", "is_generated")
     search_fields = ("description", "entity_type", "entity_id", "actor__username")
     readonly_fields = (
         "actor",
@@ -16,6 +23,7 @@ class AuditLogAdmin(admin.ModelAdmin):
         "description",
         "ip_address",
         "created_at",
+        "is_generated",
     )
 
     def has_add_permission(self, request):

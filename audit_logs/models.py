@@ -26,6 +26,7 @@ class AuditLog(models.Model):
     description = models.TextField()
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_generated = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-created_at"]
